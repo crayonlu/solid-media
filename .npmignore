@@ -1,0 +1,7 @@
+src/
+docs/
+node_modules/
+tsup.config.ts
+tsconfig.json
+bun.lockb
+.gitignore

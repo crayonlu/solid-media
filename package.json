@@ -1,0 +1,60 @@
+{
+  "name": "solid-media",
+  "version": "1.0.0",
+  "description": "A framework-agnostic Web Component for controlled image and video loading with auth, dedup, concurrency, retry, and LRU cache.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "web-component",
+    "custom-element",
+    "image",
+    "video",
+    "media",
+    "lazy-load",
+    "lru-cache",
+    "auth",
+    "framework-agnostic",
+    "typescript"
+  ],
+  "author": {
+    "name": "crayonlu",
+    "url": "https://github.com/crayonlu"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crayonlu/solid-media.git"
+  },
+  "bugs": {
+    "url": "https://github.com/crayonlu/solid-media/issues"
+  },
+  "homepage": "https://github.com/crayonlu/solid-media#readme",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
