@@ -4,7 +4,14 @@ type MediaType = 'image' | 'video'
 type LoadState = 'idle' | 'loading' | 'loaded' | 'error'
 
 const VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'])
-const VIDEO_BOOLEAN_ATTRS = ['autoplay', 'loop', 'muted', 'controls', 'playsinline'] as const
+const VIDEO_BOOLEAN_ATTRS = [
+  'autoplay',
+  'loop',
+  'muted',
+  'controls',
+  'playsinline',
+] as const
+const MEDIA_STRING_ATTRS = ['alt', 'poster', 'preload'] as const
 
 function inferType(src: string): MediaType {
   const ext = src.split('?')[0]?.split('.').pop()?.toLowerCase() ?? ''
@@ -13,7 +20,13 @@ function inferType(src: string): MediaType {
 
 export class SolidMedia extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ['src', 'type', 'fallback', ...VIDEO_BOOLEAN_ATTRS]
+    return [
+      'src',
+      'type',
+      'fallback',
+      ...VIDEO_BOOLEAN_ATTRS,
+      ...MEDIA_STRING_ATTRS,
+    ]
   }
 
   private _currentSrc: string | null = null
@@ -32,7 +45,11 @@ export class SolidMedia extends HTMLElement {
     this._releaseCurrentResource()
   }
 
-  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+  attributeChangedCallback(
+    name: string,
+    oldValue: string | null,
+    newValue: string | null,
+  ): void {
     if (name === 'src' && oldValue !== newValue) {
       this._releaseCurrentResource()
       this._currentSrc = null
@@ -46,15 +63,26 @@ export class SolidMedia extends HTMLElement {
       return
     }
 
-    if (VIDEO_BOOLEAN_ATTRS.includes(name as (typeof VIDEO_BOOLEAN_ATTRS)[number])) {
+    if (
+      VIDEO_BOOLEAN_ATTRS.includes(name as (typeof VIDEO_BOOLEAN_ATTRS)[number])
+    ) {
       if (this._mediaEl instanceof HTMLVideoElement) {
         this._syncVideoAttrs(this._mediaEl)
       }
     }
+
+    if (
+      MEDIA_STRING_ATTRS.includes(name as (typeof MEDIA_STRING_ATTRS)[number])
+    ) {
+      this._syncMediaAttrs()
+    }
   }
 
   private _setupIntersectionObserver(): void {
-    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+    if (
+      typeof window === 'undefined' ||
+      typeof IntersectionObserver === 'undefined'
+    ) {
       this._triggerLoad()
       return
     }
@@ -110,12 +138,13 @@ export class SolidMedia extends HTMLElement {
 
     if (type === 'video') {
       const video = document.createElement('video')
-      video.src = objectUrl
       this._syncVideoAttrs(video)
+      video.src = objectUrl
       this._mediaEl = video
       this.appendChild(video)
     } else {
       const img = document.createElement('img')
+      this._syncImageAttrs(img)
       img.src = objectUrl
       this._mediaEl = img
       this.appendChild(img)
@@ -138,6 +167,7 @@ export class SolidMedia extends HTMLElement {
       this.appendChild(video)
     } else {
       const img = document.createElement('img')
+      this._syncImageAttrs(img)
       img.src = fallback
       this._mediaEl = img
       this.appendChild(img)
@@ -150,6 +180,41 @@ export class SolidMedia extends HTMLElement {
     video.muted = this.hasAttribute('muted')
     video.controls = this.hasAttribute('controls')
     video.playsInline = this.hasAttribute('playsinline')
+
+    const poster = this.getAttribute('poster')
+    const preload = this.getAttribute('preload')
+
+    if (poster) {
+      video.poster = poster
+    } else {
+      video.removeAttribute('poster')
+    }
+
+    if (preload) {
+      video.setAttribute('preload', preload)
+    } else {
+      video.removeAttribute('preload')
+    }
+  }
+
+  private _syncImageAttrs(img: HTMLImageElement): void {
+    const alt = this.getAttribute('alt')
+    if (alt !== null) {
+      img.alt = alt
+    } else {
+      img.removeAttribute('alt')
+    }
+  }
+
+  private _syncMediaAttrs(): void {
+    if (this._mediaEl instanceof HTMLVideoElement) {
+      this._syncVideoAttrs(this._mediaEl)
+      return
+    }
+
+    if (this._mediaEl instanceof HTMLImageElement) {
+      this._syncImageAttrs(this._mediaEl)
+    }
   }
 
   private _releaseCurrentResource(): void {

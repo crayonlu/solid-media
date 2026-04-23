@@ -7,9 +7,13 @@ const MAX_RETRIES = 3
 const RETRY_DELAYS: [number, number, number] = [1000, 2000, 4000]
 
 function is4xxError(err: unknown): boolean {
-  if (err instanceof Response) return err.status >= 400 && err.status < 500
-  if (err instanceof Error && err.message.includes('4')) return false
-  return false
+  if (err instanceof Response) return err.status >= 400 && err.status < 500;
+  const status =
+    typeof err === "object" && err !== null && "status" in err
+      ? Number(err.status)
+      : 0;
+  if (status >= 400 && status < 500) return true;
+  return false;
 }
 
 function delay(ms: number): Promise<void> {

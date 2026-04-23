@@ -1,6 +1,6 @@
 {
   "name": "solid-media",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A framework-agnostic Web Component for controlled image and video loading with auth, dedup, concurrency, retry, and LRU cache.",
   "type": "module",
   "main": "./dist/index.cjs",
